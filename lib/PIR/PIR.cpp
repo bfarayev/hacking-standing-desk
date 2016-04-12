@@ -16,6 +16,25 @@ void calibratePIR(){
   delay(500);
 }
 
+
+bool isHumanThere(){
+  int i;
+  bool motion = false;
+
+  while(i < 5000){
+    
+    if(digitalRead(pirPin) == HIGH){
+      motion = true;
+      break;
+    }else{
+      i++;
+    }
+    motion = false;
+  }
+
+  return motion;
+}
+
 /*
 void loop(){
 

@@ -1,12 +1,13 @@
-#include <PIR.h>
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+#include <PIR.h>
+#include <Ultrasonic.h>
+
 
 /* Digital Pin that's connected to LED in Bluetooth module */
 #define IsBluetoothConnected_Pin 9
 
 /* Digital pin that PIR outpus is connected */
-#define pirPin  7
 #define pinUp   5
 #define pinDown 6
 
@@ -79,6 +80,9 @@ void setup()
   /* Calibrates PIR sensor */
   calibratePIR();
 
+  /* Configure Ultrasonic sensor */
+
+
   /* Pins to control the dest */
   pinMode(pinUp, OUTPUT);
   pinMode(pinDown, OUTPUT);
@@ -91,27 +95,25 @@ void setup()
 }
 
 
-
-/* Adding this function but NOT using it yet */
-bool isHumanThere(){
-  if(digitalRead(pirPin) == HIGH){
-    return true;
-  }else{
-    return false;
-  }
-}
-
-
 void loop()
 {
   /* Check if Bluetooth is connected */
   if(digitalRead(IsBluetoothConnected_Pin) == HIGH){
     /* Do the main things here:
-    *  Send the height data over Bluetooth every 10 seconds
+    *  Send the height data over Bluetooth
     */
-      while(BL_Serial.available()){
+
+    if (isHumanThere()) {
+      /* code */
+      int distance = MeasureDistance();
+      /* Send the distance over Bluetooth */
+      BL_Serial.println(distance); // Check if works okay
+    }
+
+
+    while(BL_Serial.available()){
       /* Test Line */
-      // Serial.println("Inside Bluetooth control..");
+      // Serial.println("Inside Bluetooth control..");2
       // Serial.println(BL_Serial.read());
       bl_input = BL_Serial.read();
 
@@ -138,22 +140,4 @@ void loop()
 
   }
 
-
-  // while(isHumanThere() == true){
-  //   Serial.println("Human is there");
-  //   digitalWrite(ledPin, HIGH);
-  //   delay(1000);
-  // }
-
-
-  /*
-  // turn the LED on (HIGH is the voltage level)
-  digitalWrite(LED_BUILTIN, HIGH);
-  // wait for a second
-  delay(1000);
-  // turn the LED off by making the voltage LOW
-  digitalWrite(LED_BUILTIN, LOW);
-   // wait for a second
-  delay(1000);
-  */
 }

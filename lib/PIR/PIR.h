@@ -1,7 +1,7 @@
 #include "SoftwareSerial.h"
 #include "Arduino.h"
 
-
-//int calibrationTime = 5;
+#define pirPin  7
 
 void calibratePIR();
+bool isHumanThere();
