@@ -1,5 +1,6 @@
 #include <PIR.h>
 
+int counter = 0;
 /* Calibration time for PIR */
 static int calibrationTime = 5;
 
@@ -18,19 +19,22 @@ void calibratePIR(){
 
 
 bool isHumanThere(){
-  int i;
+  int i = 0;
   bool motion = false;
 
   while(i < 5000){
-    
+
     if(digitalRead(pirPin) == HIGH){
       motion = true;
+      counter = 0;
       break;
     }else{
       i++;
     }
     motion = false;
   }
+
+  (motion == true) ? : counter++;
 
   return motion;
 }

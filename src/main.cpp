@@ -2,24 +2,23 @@
 #include <SoftwareSerial.h>
 #include <PIR.h>
 #include <Ultrasonic.h>
-
+#include <functions.h>
+#include <string.h>
 
 /* Digital Pin that's connected to LED in Bluetooth module */
 #define IsBluetoothConnected_Pin 9
-
+/* the time when the sensor outputs a low impulse */
+String bluetoothData = "";
+String customHeight = "";
 /* Digital pin that PIR outpus is connected */
-#define pinUp   5
-#define pinDown 6
+#define pinUp   6
+#define pinDown 5
 
-int ledPin = 8;
-/* Initialize software serial for Bluetooth (RX,TX)
-*  and PIR sensor (RX)
-*/
+int ledPin = 8; // reserved for debugging purposes
 
+/* Initialize software serial for Bluetooth (RX,TX) */
 SoftwareSerial BL_Serial(10,11);
 
-/* the time when the sensor outputs a low impulse */
-long unsigned int lowIn;
 
 /* The amount of time the sensor has to be low
 * before we assume all motion has stopped
@@ -31,6 +30,7 @@ boolean takeLowTime;
 
 uint8_t bl_input = 0, pc_input = 0;
 
+
 void togglePin(uint8_t LED,uint8_t delayDuration){
   /* Toggle LED every delayDuration second */
   digitalWrite(LED, HIGH);
@@ -40,24 +40,48 @@ void togglePin(uint8_t LED,uint8_t delayDuration){
   return;
 }
 
+/* Not used at current codes.
+*  Will be useful when you set the desk to custom heigth. */
 void MoveTheDeskUp(int duration){
   /* Lifting the table up */
   Serial.println("Moving the desk up..");
-  digitalWrite(pinDown, LOW);
-  delay(duration);
+  digitalWrite(pinUp, LOW);
+  delay(abs(duration));
   /* Make this pin HIGH to stop the desk moving */
-  digitalWrite(pinDown, HIGH);
+  digitalWrite(pinUp, HIGH);
   Serial.println("Command successfully executed");
 }
 
 void MoveTheDeskDown(int duration){
   /* Lifting the table up */
   Serial.println("Moving the desk down..");
-  digitalWrite(pinUp, LOW);
-  delay(duration);
+  digitalWrite(pinDown, LOW);
+  delay(abs(duration));
   /* Make this pin HIGH to stop the desk moving */
   Serial.println("Command successfully executed");
-  digitalWrite(pinUp, HIGH);
+  digitalWrite(pinDown, HIGH);
+}
+
+
+void MoveTheDeskToCertainHeight(int desiredHeight){
+  Serial.println("I'm in MoveTheDeskToCertainHeight function biacht");
+  /* This function should take the custom height as an
+  * argument and set desiredHeight as that. The rest of the code
+  * will handle it. */
+  // int desiredHeight = 100;
+  int currentHeight = MeasureDistance();
+  float diff = currentHeight - (float) desiredHeight;
+  diff = abs(diff); // take absolute value, cuz diff can be negative.
+  float movementDurationMillis = diff / 3; // divide to 3
+  Serial.println("Movement Duration is:");
+  Serial.println(movementDurationMillis);
+
+  if(currentHeight > desiredHeight){
+      MoveTheDeskDown(movementDurationMillis * 1000);
+  }else{
+      MoveTheDeskUp(movementDurationMillis * 1000);
+  }
+  return;
 }
 
 void setup()
@@ -78,14 +102,12 @@ void setup()
   digitalWrite(pirPin, LOW);
 
   /* Calibrates PIR sensor */
-  calibratePIR();
+  calibratePIR(); // Takes 10 seconds to calibrate.
 
-  /* Configure Ultrasonic sensor */
-
-
-  /* Pins to control the dest */
+  /* Pins to control the desk */
   pinMode(pinUp, OUTPUT);
   pinMode(pinDown, OUTPUT);
+
   /* Initialize the PinUP & Down to HIGH
   * so that the desk won't be moving initially
   * Pulling PinUp and Down LOW moves the desk
@@ -94,6 +116,36 @@ void setup()
   digitalWrite(pinDown, HIGH);
 }
 
+void ExecuteBluetoothCommand(String inputString){
+
+  //if(inputString.indexOf("U") >=0)
+
+  /* If char array contains U or u, then move it up. */
+  // if(bl_input == 'U' || bl_input == 'u'){
+  if(inputString.indexOf('U') >= 0){
+    Serial.println("You sent \"UP\"command. So I'm lifting your desk");
+    digitalWrite(pinUp, LOW);
+    // MoveTheDeskUp(1000);
+  }else if (inputString.indexOf('D') >= 0){
+    Serial.println("You sent \"DOWN\"command. So I'm pushing down your desk");
+    digitalWrite(pinDown, LOW);
+  }else if(inputString.indexOf('S') >= 0){
+    digitalWrite(pinDown, HIGH);
+    digitalWrite(pinUp, HIGH);
+  }else if(inputString.indexOf('C') >= 0){
+    Serial.println("You want to set your desk to custom height! O'some! Let's do it biatch!");
+    customHeight = inputString.substring(inputString.indexOf('C') + 1, inputString.length() -1);
+    Serial.println("############");
+    Serial.println(customHeight);
+    Serial.println("############");
+    MoveTheDeskToCertainHeight(customHeight.toInt());
+  }
+  else{
+    /* Uncomment the below line for testing */
+    // ardprintf("You entered: %s", bl_input);
+  }
+
+}
 
 void loop()
 {
@@ -104,39 +156,43 @@ void loop()
     */
 
     if (isHumanThere()) {
-      /* code */
+      /* In case human is present, measure the distance and send it. */
       int distance = MeasureDistance();
       /* Send the distance over Bluetooth */
-      BL_Serial.println(distance); // Check if works okay
+      BL_Serial.println(distance);
     }
 
 
     while(BL_Serial.available()){
-      /* Test Line */
-      // Serial.println("Inside Bluetooth control..");2
-      // Serial.println(BL_Serial.read());
-      bl_input = BL_Serial.read();
 
-      /* if user sends UP command
-      *  move the desk
-      */
+      /* Receive the whole string and then decide
+      * Then execute commands. Like moving Up, Down, whatsoever.. */
 
-      if(bl_input == 'U' || bl_input == 'u'){
-        Serial.println("You sent \"UP\"command. So I'm lifting your desk");
-        MoveTheDeskUp(1000);
-      }else if (bl_input == 'D' || bl_input == 'd'){
-        Serial.println("You sent \"DOWN\"command. So I'm pushing down your desk");
-        MoveTheDeskDown(1000);
-      }else{
-        /* Uncomment the below line for testing*/
-        //Serial.println("You entered:");
-        //Serial.println(bl_input);
+      char recieved = BL_Serial.read();
 
-      }
+      bluetoothData += recieved;
+
+      /* Uncomment below line to see every character received */
+      //Serial.println(bluetoothData);
+
+      /* Process message when new line character (#) is recieved
+      * # comes from Bluetooth configuration. It may bechanged to '\n'
+      * in the future */
+      if (recieved == '#')
+      {
+        Serial.print("Arduino Received: ");
+        Serial.print(bluetoothData);
+
+        Serial.println("Now performing action according to received data");
+        ExecuteBluetoothCommand(bluetoothData);
+        bluetoothData = ""; // Clear recieved buffer
+      }else if( bluetoothData.length() >= 20 ){
+        bluetoothData += '#';
+        Serial.println("Appended newline character");
+        Serial.println(bluetoothData);
+        bluetoothData = "";
+      }else{}
     }
-  }else{
-    /* Wait for the user to connect..
-    * You may notify the user that he/she's not connected to the desk */
 
   }
 

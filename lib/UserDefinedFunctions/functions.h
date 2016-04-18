@@ -7,7 +7,7 @@
 /* This function isn't used but we can use it for some purposes*/
 int ardprintf(char *str, ...)
 {
-  int i, count=0, j=0, flag=0;
+  int i, count=0, j=0;
   char temp[ARDBUFFER+1];
   for(i=0; str[i]!='\0';i++)  if(str[i]=='%')  count++;
 

@@ -2,7 +2,7 @@
 
 int MeasureDistance(){
   /* Measure it */
-  long duration, distance;
+  float duration, distance;
   digitalWrite(trigPin, LOW);  // Added this line
   delayMicroseconds(2); // Added this line
   digitalWrite(trigPin, HIGH);
