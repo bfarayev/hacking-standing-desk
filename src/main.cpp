@@ -125,6 +125,10 @@ void ExecuteBluetoothCommand(String inputString){
   if(inputString.indexOf('U') >= 0){
     Serial.println("You sent \"UP\"command. So I'm lifting your desk");
     digitalWrite(pinUp, LOW);
+
+    // while(HeightCheck()){
+    //   HeightCheck();
+    // }
     // MoveTheDeskUp(1000);
   }else if (inputString.indexOf('D') >= 0){
     Serial.println("You sent \"DOWN\"command. So I'm pushing down your desk");
@@ -147,53 +151,76 @@ void ExecuteBluetoothCommand(String inputString){
 
 }
 
+void HeightCheck(int distance){
+      Serial.println("called");
+      Serial.println(distance);
+      if (digitalRead(pinDown) == LOW || digitalRead(pinUp) == LOW){
+             if(distance > 95) {
+               digitalWrite(pinUp, HIGH);
+               //return false;
+             }
+             else if(distance < 95){
+               digitalWrite(pinDown, HIGH);
+               //return false;
+             }
+      //return true;
+      }
+}
+
+int distance;
+
 void loop()
 {
+
   /* Check if Bluetooth is connected */
   if(digitalRead(IsBluetoothConnected_Pin) == HIGH){
-    /* Do the main things here:
-    *  Send the height data over Bluetooth
-    */
-
-    if (isHumanThere()) {
-      /* In case human is present, measure the distance and send it. */
-      int distance = MeasureDistance();
-      /* Send the distance over Bluetooth */
-      BL_Serial.println(distance);
+   /* Do the main things here:
+  //   *  Send the height data over Bluetooth
+  //   */
+  //
+     if (isHumanThere()) {
+  //     /* In case human is present, measure the distance and send it. */
+      distance = MeasureDistance();
+  //     /* Send the distance over Bluetooth */
+  //     BL_Serial.println(distance);
     }
+  //
+  //
+     while(BL_Serial.available()){
 
-
-    while(BL_Serial.available()){
-
-      /* Receive the whole string and then decide
-      * Then execute commands. Like moving Up, Down, whatsoever.. */
-
+  //     /* Receive the whole string and then decide
+  //     * Then execute commands. Like moving Up, Down, whatsoever.. */
+  //
       char recieved = BL_Serial.read();
+  //
+       bluetoothData += recieved;
+  //
+  //     /* Uncomment below line to see every character received */
+  //     //Serial.println(bluetoothData);
+  //
+  //     /* Process message when new line character (#) is recieved
+  //     * # comes from Bluetooth configuration. It may bechanged to '\n'
+  //     * in the future */
+       if (recieved == '#')
+       {
+         Serial.print("Arduino Received: ");
+         Serial.print(bluetoothData);
 
-      bluetoothData += recieved;
-
-      /* Uncomment below line to see every character received */
-      //Serial.println(bluetoothData);
-
-      /* Process message when new line character (#) is recieved
-      * # comes from Bluetooth configuration. It may bechanged to '\n'
-      * in the future */
-      if (recieved == '#')
-      {
-        Serial.print("Arduino Received: ");
-        Serial.print(bluetoothData);
-
-        Serial.println("Now performing action according to received data");
-        ExecuteBluetoothCommand(bluetoothData);
-        bluetoothData = ""; // Clear recieved buffer
-      }else if( bluetoothData.length() >= 20 ){
-        bluetoothData += '#';
-        Serial.println("Appended newline character");
-        Serial.println(bluetoothData);
-        bluetoothData = "";
-      }else{}
-    }
-
-  }
+         Serial.println("Now performing action according to received data");
+         ExecuteBluetoothCommand(bluetoothData);
+         bluetoothData = ""; // Clear recieved buffer
+       }else if( bluetoothData.length() >= 20 ){
+         bluetoothData += '#';
+         Serial.println("Appended newline character");
+         Serial.println(bluetoothData);
+         bluetoothData = "";
+       }else{}
+  //
+  //
+     }
+  //
+   HeightCheck(distance);
+  //
+   }
 
 }
