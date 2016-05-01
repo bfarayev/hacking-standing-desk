@@ -4,12 +4,13 @@
 #include <Ultrasonic.h>
 #include <functions.h>
 #include <string.h>
-
+#include <sdcard.h>
 /* Digital Pin that's connected to LED in Bluetooth module */
 #define IsBluetoothConnected_Pin 9
 /* the time when the sensor outputs a low impulse */
 String bluetoothData = "";
 String customHeight = "";
+String userID = "";
 /* Digital pin that PIR outpus is connected */
 #define pinUp   6
 #define pinDown 5
@@ -130,6 +131,15 @@ void setup()
   BL_Serial.println(currentHeight);
   Serial.println(currentHeight);
 
+  //Initialize SD card
+  Serial.println("Initialize SD card ...");
+  if (!SD.begin(CS_Pin)) {
+    Serial.println("initialization failed!");
+  }
+  else{
+    Serial.println("initialization done");
+  }
+
 }
 
 void ExecuteBluetoothCommand(String inputString){
@@ -146,7 +156,7 @@ void ExecuteBluetoothCommand(String inputString){
     //   HeightCheck();
     // }
     // MoveTheDeskUp(1000);
-    
+
   }else if (inputString.indexOf('D') >= 0){
     Serial.println("You sent \"DOWN\"command. So I'm pushing down your desk");
     digitalWrite(pinDown, LOW);
@@ -161,8 +171,11 @@ void ExecuteBluetoothCommand(String inputString){
     Serial.println(customHeight);
     Serial.println("############");
     MoveTheDeskToCertainHeight(customHeight.toInt());
-  }
-  else{
+  }else if(inputString.indexOf('N') >= 0){
+    Serial.println("Create new text file according to user ID...");
+    userID = inputString.substring(inputString.indexOf('C') + 1, inputString.length() -1);
+    CreateNewTextFile(userID);
+  }else{
     /* Uncomment the below line for testing */
     // ardprintf("You entered: %s", bl_input);
   }
