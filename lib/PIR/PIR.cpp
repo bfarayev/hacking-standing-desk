@@ -5,42 +5,42 @@ int counter = 0;
 static int calibrationTime = 5;
 
 void calibratePIR(){
-  /* Calibrating Sensor for 10 seconds */
-  Serial.print("calibrating sensor ");
-  for(int i = 0; i < calibrationTime; i++){
-    Serial.print(".");
-    delay(1000);
-  }
+        /* Calibrating Sensor for 10 seconds */
+        Serial.print("calibrating sensor ");
+        for(int i = 0; i < calibrationTime; i++) {
+                Serial.print(".");
+                delay(1000);
+        }
 
-  Serial.println("done");
-  Serial.println("PIR Sensor: Active");
-  delay(500);
+        Serial.println("done");
+        Serial.println("PIR Sensor: Active");
+        delay(500);
 }
 
 
 bool isHumanThere(){
-  int i = 0;
-  bool motion = false;
+        int i = 0;
+        bool motion = false;
 
-  while(i < 5000){
+        while(i < 5000) {
 
-    if(digitalRead(pirPin) == HIGH){
-      motion = true;
-      counter = 0;
-      break;
-    }else{
-      i++;
-    }
-    motion = false;
-  }
+                if(digitalRead(pirPin) == HIGH) {
+                        motion = true;
+                        counter = 0;
+                        break;
+                }else{
+                        i++;
+                }
+                motion = false;
+        }
 
-  (motion == true) ? : counter++;
+        (motion == true) ? : counter++;
 
-  return motion;
+        return motion;
 }
 
 /*
-void loop(){
+   void loop(){
 
      if(digitalRead(pirPin) == HIGH){
        digitalWrite(ledPin, HIGH);   //the led visualizes the sensors output pin state
@@ -75,5 +75,5 @@ void loop(){
            delay(50);
            }
        }
-  }
-*/
+   }
+ */
