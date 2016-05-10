@@ -1,6 +1,9 @@
 #include "Arduino.h"
 
-#define trigPin 13
-#define echoPin 12
+#define TRIGPIN 32
+#define ECHOPIN 33
 
-int MeasureHeight();
+
+
+float MeasureHeight();
+float SortArrayAndReturnMedian(float Array[], int len);

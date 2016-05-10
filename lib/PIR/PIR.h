@@ -1,7 +1,6 @@
-#include "SoftwareSerial.h"
 #include "Arduino.h"
 
-#define pirPin  7
+#define PIRPIN 30
 
 // long unsigned int lowIn;
 

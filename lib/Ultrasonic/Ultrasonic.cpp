@@ -1,49 +1,99 @@
 #include <Ultrasonic.h>
 
-int MeasureHeight(){
-        /* Measure it */
-        float duration = 0, distance = 0;
-        float sum = 0;
-        int validElements = 0;
 
-        /* Do 6 measurements and take their average */
-        int numberOfIterations = 6;
+
+float MeasureHeight(){
+        /* Takes 1 second to execute*/
+        float duration = 0, height = 0;
+
+        /* Upper and Lower Bounds for Desk Height
+           Using this, we filter invalid measurements */
+
+        int UPPERBOUND = 125;
+        int LOWERBOUND = 60;
+
+        int numberOfIterations = 10;
+
+        /* Create empty float array for measurements */
+        float tmpMeasurements[numberOfIterations];
+        int size = 0;
 
         for(int i = 0; i< numberOfIterations; i++) {
-                digitalWrite(trigPin, LOW); // Added this line
-                delayMicroseconds(2); // Added this line
-                digitalWrite(trigPin, HIGH);
-                delayMicroseconds(10); // Added this line
-                digitalWrite(trigPin, LOW);
-                duration = pulseIn(echoPin, HIGH);
-                distance = (duration/2) / 29.1;
+                digitalWrite(TRIGPIN, LOW);
+                delayMicroseconds(2);
+                digitalWrite(TRIGPIN, HIGH);
+                delayMicroseconds(5);
+                digitalWrite(TRIGPIN, LOW);
 
-                /* This is a simple but not the best logic
-                * to eliminate the invalid measurements */
+                duration = pulseIn(ECHOPIN, HIGH);
 
-                if (distance < 120 && distance > 40) {
-                        //Serial.println ("invalid measurement");
-                        sum += distance;
-                        validElements += 1;
+                /* Convert to cm */
+                height = duration / 58.138;
+
+                /* This is a simple logic
+                   to eliminate the invalid measurements */
+
+
+                if (height < UPPERBOUND && height > LOWERBOUND) {
+                        /* For debugging purposes */
+                        // Serial.println ("Valid measurement");
+                        // Serial.println (height);
+                        tmpMeasurements[size] = height;
+                        size += 1;
                 }
-                /* For debugging purposes */
-                Serial.println (distance);
-                // Serial.println(validElements);
+
+                /* Put small delay between iterations */
+                delay(100);
         }
 
-        /* Alternative solution for eliminating wrong measurements
-         * But it still needs to be fixed. */
-        // for(int k = 0; k <= 5; k+=2){
-        //   if(abs(tmpHeight[k] - tmpHeight[k+1]) <= 2){
-        //     // One of them is invalid
-        //     sum+= tmpHeight[k];
-        //     sum+= tmpHeight[k+1];
-        //     validElements+=2;
-        //   }
-        // }
 
-        /* Return the average height */
-        // Serial.println(sum);
-        // Serial.println(sum/validElements);
-        return sum/validElements;
+        /* Return the average height*/
+        if(size != 0) {
+                return SortArrayAndReturnMedian(tmpMeasurements, size);
+        }else{
+                Serial.println("Something unexpectedly went wrong. Make sure you're not blocking the sensors.");
+                return 0;
+        }
+}
+
+
+float SortArrayAndReturnMedian(float Array[], int len){
+        /* Get measurements with valid elements and size. Sort them and take median. */
+
+        /* Buble sort */
+        for(int i=0; i<(len-1); i++) {
+                for(int j=0; j<(len-(i+1)); j++) {
+                        if(Array[j] > Array[j+1]) {
+                                float t = Array[j];
+                                Array[j] = Array[j+1];
+                                Array[j+1] = t;
+                        }
+                }
+        } // End of Bubble Sort
+
+        /* For Debugging purposes*/
+        for(int i = 0; i<=len-1; i++) {
+                Serial.println(Array[i]);
+        }
+
+        /* Take element in the middle. Check the diff b/w prev and next element of array/
+              If the diff is < 2 cm then return median. Otherwise return 0 */
+
+        int DIFF = 2; // 2 cm
+
+        if(len < 3) {
+                return 0;
+        }else{
+                /* Take the diff between prev and next elems */
+
+                if (Array[(len)/2] - Array[(len)/2 - 1] < DIFF && Array[(len)/2 + 1] - Array[(len)/2] < DIFF) {
+                        Serial.println("Height is: ");
+                        Serial.println(Array[(len)/2]);
+                        return Array[len/2];
+                }else{
+                        Serial.println("Something unexpectedly went wrong. Make sure you're not blocking the sensors.");
+                        return 0;
+                }
+        }
+
 }
