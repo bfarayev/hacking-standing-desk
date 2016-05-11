@@ -9,6 +9,8 @@ String bluetoothData = "";
 bool sendOnce = true;
 #define IsBluetoothConnected_Pin 31
 float currentHeight = 0;
+int PIRcounter = 0;
+bool userIsHere = true;
 
 void setup()
 {
@@ -63,11 +65,11 @@ void loop()
            code runs even if there's not BT connection.
          */
 
-        if(digitalRead(IsBluetoothConnected_Pin) == HIGH) {
+        if(digitalRead(IsBluetoothConnected_Pin) == HIGH && userIsHere) {
                 /* When the user connects, send the current height just once
                    Force this function to send height over Bluetooth */
 
-                while(sendOnce == true && isHumanThere()) {
+                while(sendOnce == true) {
                         /* In case human is present, measure the distance and send it. */
                         while(currentHeight == 0) {
                                 Serial.println("Trying to measure the height again..");
@@ -81,7 +83,7 @@ void loop()
 
                         sendOnce = false;
 
-                        /* TODO: Here you should write to file using the user's ID.
+                        /*  Here you should write to file using the user's ID.
                            So up to this point, you have to make sure that user and MCU shared the userID.
                            Writing to file should be done in every height change!  */
 
@@ -114,5 +116,21 @@ void loop()
                         }else{}
 
                 } /* end of while Bluetooth Serial avail */
+
+                /* TODO: Call isHumanThere function and count how many times it returns false repeatedly.
+                 * If it returns true within <given time> set it to 0 */
+
+                if(isHumanThere()) {
+                        PIRcounter = 0;
+                        userIsHere = true;
+                }else{
+                        PIRcounter++;
+                        if(PIRcounter > 600) {
+                                Serial.println(PIRcounter);
+                                userIsHere = false;
+                        }
+                }
+
+
         } /* end of if Bluetooth connected*/
 }/* end of loop */
