@@ -117,8 +117,7 @@ void loop()
 
                 } /* end of while Bluetooth Serial avail */
 
-                /* TODO: Call isHumanThere function and count how many times it returns false repeatedly.
-                 * If it returns true within <given time> set it to 0 */
+                /* FIXME: Check how much time it takes to run isHumanThere function. */
 
                 if(isHumanThere()) {
                         PIRcounter = 0;
@@ -126,7 +125,9 @@ void loop()
                 }else{
                         PIRcounter++;
                         if(PIRcounter > 600) {
+                                Serial.println("You've left your desk");
                                 Serial.println(PIRcounter);
+                                Serial1.println("You've left your desk");
                                 userIsHere = false;
                         }
                 }
