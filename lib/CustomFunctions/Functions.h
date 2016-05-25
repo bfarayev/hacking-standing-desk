@@ -5,6 +5,7 @@
 #define PINDOWN 42
 extern bool sendOnce;
 extern float currentHeight;
+extern bool BluetoothSend;
 
 void ExecuteBluetoothCommand(String);
 void HeightCheck(int);

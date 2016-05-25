@@ -11,6 +11,7 @@ bool sendOnce = true;
 float currentHeight = 0;
 int PIRcounter = 0;
 bool userIsHere = true;
+bool BluetoothSend = false;
 
 void setup()
 {
@@ -70,6 +71,7 @@ void loop()
                    Force this function to send height over Bluetooth */
 
                 while(sendOnce == true) {
+                        currentHeight = 0;
                         /* In case human is present, measure the distance and send it. */
                         while(currentHeight == 0) {
                                 Serial.println("Trying to measure the height again..");
@@ -79,8 +81,9 @@ void loop()
 
                         // Serial.println(currentHeight);
                         Serial.println((int) currentHeight);
+                        if(BluetoothSend == true){
                         Serial1.println((int) currentHeight);
-
+                        }
                         sendOnce = false;
 
                         /*  Here you should write to file using the user's ID.

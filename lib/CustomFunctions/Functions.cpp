@@ -3,7 +3,6 @@
 /* Pins for controlling the desk */
 
 
-
 void ExecuteBluetoothCommand(String inputString){
         String customHeight = "";
         //if(inputString.indexOf("U") >=0)
@@ -13,6 +12,7 @@ void ExecuteBluetoothCommand(String inputString){
         if(inputString.indexOf('U') == 0) {
                 Serial.println("You sent \"UP\"command. So I'm lifting your desk");
                 digitalWrite(PINUP, LOW);
+                BluetoothSend = true;
         }else if (inputString.indexOf('D') == 0) {
                 Serial.println("You sent \"DOWN\"command. So I'm pushing down your desk");
                 digitalWrite(PINDOWN, LOW);
@@ -21,13 +21,15 @@ void ExecuteBluetoothCommand(String inputString){
                 digitalWrite(PINUP, HIGH);
                 sendOnce = true;
                 currentHeight = 0;
+                BluetoothSend = true;
         }else if(inputString.indexOf('C') == 0) {
                 Serial.println("You want to set your desk to custom height! O'some! Let's do it biatch!");
-                customHeight = inputString.substring(inputString.indexOf('C'), inputString.indexOf(' '));
+                customHeight = inputString.substring(inputString.indexOf('C')+1, inputString.indexOf('#'));
                 Serial.println("############");
                 Serial.println(customHeight);
                 Serial.println("############");
                 MoveTheDeskToCertainHeight(customHeight.toInt());
+                BluetoothSend = false;
         }
         else{
                 /* Uncomment the below line for testing */
@@ -54,7 +56,7 @@ void HeightCheck(int distance){
 }
 
 void MoveTheDeskToCertainHeight(int desiredHeight){
-        Serial.println("I'm in MoveTheDeskToCertainHeight function biacht");
+        Serial.println("I'm in MoveTheDeskToCertainHeight function");
         /* This function should take the custom height as an
          * argument and set desiredHeight as that. The rest of the code
          * will handle it. */
@@ -62,7 +64,7 @@ void MoveTheDeskToCertainHeight(int desiredHeight){
         int currentHeight = MeasureHeight();
         float diff = currentHeight - (float) desiredHeight;
         diff = abs(diff); // take absolute value, cuz diff can be negative.
-        float movementDurationMillis = diff / 3; // divide to 3
+        float movementDurationMillis = diff / 3.85; // divide to 3
         Serial.println("Movement Duration is:");
         Serial.println(movementDurationMillis);
 
