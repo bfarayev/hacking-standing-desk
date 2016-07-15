@@ -4,7 +4,6 @@
 #include <Functions.h>
 #include <sdcard.h>
 
-/* the time when the sensor outputs a low impulse */
 String bluetoothData = "";
 bool sendOnce = true;
 #define IsBluetoothConnected_Pin 31
@@ -61,7 +60,7 @@ void setup()
 
 void loop()
 {
-        /* FIXME: Check if Bluetooth is connected. LED Pin in BT should be
+        /* TODO: Check if Bluetooth is connected. LED Pin in BT should be
            checked if it's HIGH. Only then, below code should be run. For simplicity,
            code runs even if there's not BT connection.
          */
@@ -77,27 +76,26 @@ void loop()
                                 Serial.println("Trying to measure the height again..");
                                 currentHeight = MeasureHeight();
                         }
-                        /* Send the distance over Bluetooth */
 
-                        // Serial.println(currentHeight);
+                        /* Send the distance over Bluetooth */
                         Serial.println((int) currentHeight);
-                        if(BluetoothSend == true){
-                        Serial1.println((int) currentHeight);
+                        if(BluetoothSend == true) {
+                                Serial1.println((int) currentHeight);
                         }
                         sendOnce = false;
 
                         /*  Here you should write to file using the user's ID.
-                           So up to this point, you have to make sure that user and MCU shared the userID.
-                           Writing to file should be done in every height change!  */
+                         * So up to this point, you have to make sure that user
+                         * and MCU shared the userID.
+                         * Writing to file should be done in every height change!
+                         */
 
-                        /* Forming the data*/
-                        /* OpenFileAndWriteData */
                 }
 
                 while(Serial1.available()) {
 
-                        /* Receive the whole string and then decide
-                         * Then execute commands. Like moving Up, Down, whatsoever.. */
+                        /* Receive the whole string then execute commands
+                         * eg. moving Up, Down, whatsoever.. */
 
                         char recieved = Serial1.read();
                         bluetoothData += recieved;
@@ -109,6 +107,7 @@ void loop()
                         if (recieved == '#') // # - End of String
                         {
                                 Serial.println("Now performing action according to received data");
+                                Serial.println(bluetoothData);
                                 ExecuteBluetoothCommand(bluetoothData);
                                 bluetoothData = ""; // Clear recieved buffer
                         }else if( bluetoothData.length() >= 40 ) {
@@ -118,10 +117,9 @@ void loop()
                                 bluetoothData = "";
                         }else{}
 
-                } /* end of while Bluetooth Serial avail */
+                }
 
-                /* FIXME: Check how much time it takes to run isHumanThere function. */
-
+                /* Note: Check how much time it takes to run isHumanThere function. */
                 if(isHumanThere()) {
                         PIRcounter = 0;
                         userIsHere = true;

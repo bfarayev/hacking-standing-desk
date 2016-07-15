@@ -1,14 +1,8 @@
 #include "Functions.h"
 
-/* Pins for controlling the desk */
-
-
 void ExecuteBluetoothCommand(String inputString){
         String customHeight = "";
-        //if(inputString.indexOf("U") >=0)
 
-        /* If char array contains U or u, then move it up. */
-        // if(bl_input == 'U' || bl_input == 'u'){
         if(inputString.indexOf('U') == 0) {
                 Serial.println("You sent \"UP\"command. So I'm lifting your desk");
                 digitalWrite(PINUP, LOW);
@@ -29,7 +23,7 @@ void ExecuteBluetoothCommand(String inputString){
                 Serial.println(customHeight);
                 Serial.println("############");
                 MoveTheDeskToCertainHeight(customHeight.toInt());
-                BluetoothSend = false;
+                BluetoothSend = true;   // Send that data to Bluetooth
         }
         else{
                 /* Uncomment the below line for testing */
@@ -37,7 +31,6 @@ void ExecuteBluetoothCommand(String inputString){
         }
 
 }
-
 
 void HeightCheck(int distance){
 

@@ -30,6 +30,5 @@ bool isHumanThere(){
         }
 
         /* (motion == true) ? : counter++; */
-
         return motion;
 }

@@ -32,8 +32,6 @@ float MeasureHeight(){
 
                 /* This is a simple logic
                    to eliminate the invalid measurements */
-
-
                 if (height < UPPERBOUND && height > LOWERBOUND) {
                         /* For debugging purposes */
                         // Serial.println ("Valid measurement");
@@ -45,7 +43,6 @@ float MeasureHeight(){
                 /* Put small delay between iterations */
                 delay(100);
         }
-
 
         /* Return the average height*/
         if(size != 0) {
@@ -60,7 +57,7 @@ float MeasureHeight(){
 float SortArrayAndReturnMedian(float Array[], int len){
         /* Get measurements with valid elements and size. Sort them and take median. */
 
-        /* Buble sort */
+        /* Buble sort. BOOM! */
         for(int i=0; i<(len-1); i++) {
                 for(int j=0; j<(len-(i+1)); j++) {
                         if(Array[j] > Array[j+1]) {
@@ -76,8 +73,8 @@ float SortArrayAndReturnMedian(float Array[], int len){
                 Serial.println(Array[i]);
         }
 
-        /* Take element in the middle. Check the diff b/w prev and next element of array/
-              If the diff is < 2 cm then return median. Otherwise return 0 */
+        /* Take element in the middle. Check the diff b/w prev and next element of
+         *  If the diff is < 2 cm then return median. Otherwise return 0 */
 
         int DIFF = 2; // 2 cm
 
