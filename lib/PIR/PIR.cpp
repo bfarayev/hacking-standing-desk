@@ -17,7 +17,7 @@ void calibratePIR(){
 bool isHumanThere(){
         int i = 0;
         bool motion = false;
-        int maxIterationCycle = 10000;
+        int maxIterationCycle = 10;
 
         while(i < maxIterationCycle) {
                 if(digitalRead(PIRPIN) == HIGH) {
@@ -28,7 +28,6 @@ bool isHumanThere(){
                 }
                 motion = false;
         }
-
         /* (motion == true) ? : counter++; */
         return motion;
 }

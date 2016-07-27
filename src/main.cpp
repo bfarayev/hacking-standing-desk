@@ -64,6 +64,7 @@ void loop()
            checked if it's HIGH. Only then, below code should be run. For simplicity,
            code runs even if there's not BT connection.
          */
+        /* Note: Check how much time it takes to run isHumanThere function. */
 
         if(digitalRead(IsBluetoothConnected_Pin) == HIGH && userIsHere) {
                 /* When the user connects, send the current height just once
@@ -119,19 +120,23 @@ void loop()
 
                 }
 
-                /* Note: Check how much time it takes to run isHumanThere function. */
+                /* FIXME: When user leaves the desk.
+                 */
                 if(isHumanThere()) {
+                        Serial.println("I'm here");
+                        delay(1000);
                         PIRcounter = 0;
                         userIsHere = true;
                 }else{
                         PIRcounter++;
-                        if(PIRcounter > 600) {
+                        Serial.println(PIRcounter);
+                        if(PIRcounter > 100) {
                                 Serial.println("You've left your desk");
                                 Serial.println(PIRcounter);
-                                Serial1.println("You've left your desk");
                                 userIsHere = false;
                         }
                 }
+
 
 
         } /* end of if Bluetooth connected*/
